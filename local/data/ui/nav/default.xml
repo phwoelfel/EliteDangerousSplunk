@@ -1,0 +1,12 @@
+<nav search_view="search">
+  <view name="overview" default='true' />
+  <view name="statistics" />
+  <view name="fsd_jump_statistics" />
+  <view name="mining" />
+  <view name="scanning" />
+  <view name="search" />
+  <view name="datasets" />
+  <view name="reports" />
+  <view name="alerts" />
+  <view name="dashboards" />
+</nav>

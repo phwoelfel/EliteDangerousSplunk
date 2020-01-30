@@ -1,0 +1,183 @@
+<form theme="dark">
+  <label>Scanning</label>
+  <fieldset submitButton="false">
+    <input type="time" token="token_datetime">
+      <label></label>
+      <default>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Objects Scanned</title>
+      <single>
+        <search>
+          <query>`ed_index` event=Scan 
+| stats count</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>FSS Signals Discovered</title>
+      <single>
+        <search>
+          <query>`ed_index` event=FSSSignalDiscovered
+| stats count</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Surface Scans Complete</title>
+      <single>
+        <search>
+          <query>`ed_index` event=SAAScanComplete
+| stats count</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051", "0x0877a6", "0xf8be34", "0xf1813f", "0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Scanned Planets</title>
+      <table>
+        <search>
+          <query>`ed_index` event=Scan
+| sort - _time 
+| table _time BodyName StarType PlanetClass Landable WasDiscovered WasMapped Composition.*</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="WasDiscovered">
+          <colorPalette type="map">{"false":#DC4E41,"true":#53A051}</colorPalette>
+        </format>
+        <format type="color" field="WasMapped">
+          <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
+        </format>
+        <format type="color" field="StarType">
+          <colorPalette type="map">{"K":#F8BE34,"G":#F8BE34,"B":#F8BE34,"F":#F8BE34,"O":#F8BE34,"A":#F8BE34,"M":#F8BE34}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>FSS Signals</title>
+      <table>
+        <search>
+          <query>`ed_index` event=FSSSignalDiscovered
+| eval SignalName=coalesce(SignalName_Localised, SignalName)
+| sort - _time 
+| table _time SignalName IsStation SystemAddress</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="IsStation">
+          <colorPalette type="map">{"true":#53A051}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Surface Scans Completed</title>
+      <table>
+        <search>
+          <query>`ed_index` event=SAAScanComplete
+| sort - _time 
+| table _time BodyName ProbesUsed EfficiencyTarget</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

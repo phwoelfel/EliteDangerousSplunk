@@ -1,0 +1,35 @@
+<form theme="dark">
+  <label>Mining</label>
+  <fieldset submitButton="false">
+    <input type="time" token="token_datetime">
+      <label></label>
+      <default>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Pristine Icy Rings</title>
+      <table>
+        <search>
+          <query>`ed_index` event=Scan ReserveLevel=PristineResources "Rings{}.RingClass"=eRingClass_Icy
+| sort - _time
+| table _time StarSystem BodyName DistanceFromArrivalLS PlanetClass WasMapped</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

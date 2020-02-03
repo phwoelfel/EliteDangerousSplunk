@@ -1,0 +1,157 @@
+<form theme="dark">
+  <label>Exploration</label>
+  <search id="ed_fss_discovery_scan_stats">
+    <query>`ed_index` event=FSSDiscoveryScan
+| dedup SystemName sortby -_time
+| stats sum(BodyCount) as total_body_count sum(NonBodyCount) as total_non_body_count avg(Progress) as avg_progress latest(Progress) as latest_progress latest(BodyCount) as latest_body_count latest(NonBodyCount) as latest_non_body_count</query>
+    <earliest>$token_datetime.earliest$</earliest>
+    <latest>$token_datetime.latest$</latest>
+  </search>
+  <search id="ed_fsdjump">
+    <query>`ed_index` event=FSDJump
+| eval SystemEconomy=coalesce(SystemEconomy_Localised, SystemEconomy)
+| eval SystemGovernment=coalesce(SystemGovernment_Localised, SystemGovernment)
+| eval SystemSecondEconomy=coalesce(SystemSecondEconomy_Localised, SystemSecondEconomy)
+| eval SystemSecurity=coalesce(SystemSecurity_Localised, SystemSecurity)
+| table *</query>
+    <earliest>$token_datetime.earliest$</earliest>
+    <latest>$token_datetime.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="token_datetime">
+      <label></label>
+      <default>
+        <earliest>-4h@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Total Jump Distance</title>
+      <single>
+        <search base="ed_fsdjump">
+          <query>stats sum(JumpDist) as total_jump_dist</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="unit">LY</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Fuel Statistics</title>
+      <single>
+        <title>Fuel Used</title>
+        <search base="ed_fsdjump">
+          <query>stats sum(FuelUsed)</query>
+        </search>
+        <option name="numberPrecision">0.00</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="unit">t</option>
+        <option name="unitPosition">after</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <single>
+        <title>Fuel Scooped</title>
+        <search>
+          <query>`ed_index` event=FuelScoop
+|  stats sum(Scooped) as fuel_scooped</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="numberPrecision">0.00</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="unit">t</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>FSS Scan</title>
+      <chart>
+        <title>Average Progress</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>eval avg_progress=avg_progress*100
+| fields avg_progress</query>
+        </search>
+        <option name="charting.chart">fillerGauge</option>
+        <option name="charting.chart.orientation">x</option>
+        <option name="charting.chart.rangeValues">[0,30,80,100]</option>
+        <option name="charting.gaugeColors">["0xdc4e41","0xf8be34","0x53a051"]</option>
+        <option name="height">100</option>
+      </chart>
+      <chart>
+        <title>Latest Progress</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>eval latest_progress=latest_progress*100
+| fields latest_progress</query>
+        </search>
+        <option name="charting.chart">fillerGauge</option>
+        <option name="charting.chart.orientation">x</option>
+        <option name="charting.chart.rangeValues">[0,30,80,100]</option>
+        <option name="charting.gaugeColors">["0xdc4e41","0xf8be34","0x53a051"]</option>
+        <option name="height">100</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Latest FSS Scan</title>
+      <single>
+        <title>Bodys Found</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>fields latest_body_count</query>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <single>
+        <title>Non Bodys Found</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>fields latest_non_body_count</query>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Scanned Planets</title>
+      <table>
+        <search>
+          <query>`ed_index` event=Scan
+| sort - _time 
+| table _time BodyName StarType PlanetClass Landable WasDiscovered WasMapped TerraformState Composition.*</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="WasDiscovered">
+          <colorPalette type="map">{"false":#DC4E41,"true":#53A051}</colorPalette>
+        </format>
+        <format type="color" field="WasMapped">
+          <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
+        </format>
+        <format type="color" field="StarType">
+          <colorPalette type="map">{"K":#F8BE34,"G":#F8BE34,"B":#F8BE34,"F":#F8BE34,"O":#F8BE34,"A":#F8BE34,"M":#F8BE34}</colorPalette>
+        </format>
+        <format type="color" field="PlanetClass">
+          <colorPalette type="map">{"High metal content body":#F1813F,"Water world":#006D9C,"Metal rich body":#F8BE34,"Sudarsky class II gas giant":#708794,"Rocky body":#EC9960,"Ammonia world":#B6C75A,"Earth-like world":#53A051}</colorPalette>
+        </format>
+        <format type="color" field="TerraformState">
+          <colorPalette type="map">{"Terraformable":#53A051}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+</form>

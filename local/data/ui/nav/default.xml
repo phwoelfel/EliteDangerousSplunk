@@ -1,5 +1,6 @@
 <nav search_view="search">
-  <view name="overview" default='true' />
+  <view name="exploration" default='true' />
+  <view name="overview" />
   <view name="statistics" />
   <view name="fsd_jump_statistics" />
   <view name="mining" />

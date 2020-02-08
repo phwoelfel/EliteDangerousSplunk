@@ -1,0 +1,22 @@
+PlanetClass,TerraformState,MedianMass,FSSPayout,FDFSSPayout,FullScanPayout,FDFullScanPayout
+Earthlike body,Terraformed,0.498039,270290,702753,1126206,3249900
+Earthlike body,None,0.498039,270290,702753,1126206,3249900
+Water world,Terraformable,0.453011,268616,698400,1119231,3229773
+High metal content body,Terraformable,0.466929,163948,426264,683116,1971272
+Ammonia world,None,0.43914,143463,373004,597762,1724965
+Rocky body,Terraformable,0.142312,129504,336711,539601,1557130
+Water world,None,0.780638,99747,259343,415613,1199337
+Metal rich body,None,0.323933,31632,82244,131802,380341
+Sudarsky class II gas giant,None,476.240875,28405,73853,118354,341536
+High metal content body,None,0.344919,14070,36581,58624,169171
+Sudarsky class I gas giant,None,69.551636,3845,9997,16021,46233
+Sudarsky class IV gas giant,None,2615.635376,1119,2910,4663,13457
+Sudarsky class III gas giant,None,1148.921509,995,2587,4145,11963
+Sudarsky class V gas giant,None,925.575806,966,2510,4023,11609
+Helium-Rich gas giant,None,550.141846,900,2339,3749,10818
+Gas giant with water based life,None,477.001832,883,2295,3679,10616
+Gas giant with ammonia based life,None,170.455071,774,2014,3227,9312
+Water giant,None,47.163769,667,1734,2779,8019
+Rocky ice body,None,0.180686,500,1300,1752,5057
+Icy body,None,0.01854,500,1300,1569,4527
+Rocky body,None,0.003359,500,1300,1476,4260

@@ -124,7 +124,12 @@
         <search>
           <query>`ed_index` event=Scan
 | sort - _time 
-| table _time BodyName StarType PlanetClass Landable WasDiscovered WasMapped TerraformState Composition.*</query>
+| fillnull value="None" TerraformState
+| eval TerraformState=if(TerraformState!="", TerraformState, "None")
+| lookup ed_scan_payouts.csv PlanetClass TerraformState OUTPUT FullScanPayout FDFullScanPayout
+| eval FullPayout=if(WasDiscovered=="false", FDFullScanPayout, FullScanPayout)
+| table _time BodyName StarType PlanetClass Landable WasDiscovered WasMapped TerraformState FullPayout DistanceFromArrivalLS
+          </query>
           <earliest>$token_datetime.earliest$</earliest>
           <latest>$token_datetime.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -150,6 +155,24 @@
         </format>
         <format type="color" field="TerraformState">
           <colorPalette type="map">{"Terraformable":#53A051}</colorPalette>
+        </format>
+        <format type="number" field="FullPayout">
+          <option name="precision">0</option>
+        </format>
+        <format type="color" field="FullPayout">
+          <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
+          <scale type="threshold">100000,1000000</scale>
+        </format>
+        <format type="color" field="Payout">
+          <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
+          <scale type="threshold">10000,500000</scale>
+        </format>
+        <format type="number" field="DistanceFromArrivalLS">
+          <option name="unit">LS</option>
+        </format>
+        <format type="color" field="DistanceFromArrivalLS">
+          <colorPalette type="list">[#53A051,#006D9C,#F8BE34,#F1813F,#DC4E41]</colorPalette>
+          <scale type="threshold">1000,10000,50000,100000</scale>
         </format>
       </table>
     </panel>

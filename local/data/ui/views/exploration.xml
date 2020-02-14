@@ -1,4 +1,4 @@
-<form theme="dark">
+<form theme="dark" script="table_row_highlighting.js" stylesheet="table_decorations.css">
   <label>Exploration</label>
   <search id="ed_fss_discovery_scan_stats">
     <query>`ed_index` event=FSSDiscoveryScan
@@ -120,7 +120,7 @@
   <row>
     <panel>
       <title>Scanned Planets</title>
-      <table>
+      <table id="highlight">
         <search>
           <query>`ed_index` event=Scan
 | sort - _time 

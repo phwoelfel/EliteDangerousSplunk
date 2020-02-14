@@ -128,7 +128,8 @@
 | eval TerraformState=if(TerraformState!="", TerraformState, "None")
 | lookup ed_scan_payouts.csv PlanetClass TerraformState OUTPUT FullScanPayout FDFullScanPayout
 | eval FullPayout=if(WasDiscovered=="false", FDFullScanPayout, FullScanPayout)
-| table _time BodyName StarType PlanetClass Landable WasDiscovered WasMapped TerraformState FullPayout DistanceFromArrivalLS
+| eval IsInteresting=if(FullPayout&gt;100000 AND DistanceFromArrivalLS&lt;10000, "true", "false")
+| table _time BodyName StarType PlanetClass Landable WasDiscovered WasMapped TerraformState FullPayout DistanceFromArrivalLS IsInteresting
           </query>
           <earliest>$token_datetime.earliest$</earliest>
           <latest>$token_datetime.latest$</latest>
@@ -154,7 +155,7 @@
           <colorPalette type="map">{"High metal content body":#F1813F,"Water world":#006D9C,"Metal rich body":#F8BE34,"Sudarsky class II gas giant":#708794,"Rocky body":#EC9960,"Ammonia world":#B6C75A,"Earth-like world":#53A051}</colorPalette>
         </format>
         <format type="color" field="TerraformState">
-          <colorPalette type="map">{"Terraformable":#53A051}</colorPalette>
+          <colorPalette type="map">{"Terraformable":#53A051,"Terraformed":#53A051}</colorPalette>
         </format>
         <format type="number" field="FullPayout">
           <option name="precision">0</option>
@@ -173,6 +174,12 @@
         <format type="color" field="DistanceFromArrivalLS">
           <colorPalette type="list">[#53A051,#006D9C,#F8BE34,#F1813F,#DC4E41]</colorPalette>
           <scale type="threshold">1000,10000,50000,100000</scale>
+        </format>
+        <format type="color" field="Landable">
+          <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
+        </format>
+        <format type="color" field="IsInteresting">
+          <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
         </format>
       </table>
     </panel>

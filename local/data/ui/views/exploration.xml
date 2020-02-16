@@ -17,6 +17,12 @@
     <earliest>$token_datetime.earliest$</earliest>
     <latest>$token_datetime.latest$</latest>
   </search>
+  <search id="ed_fuelscoop">
+    <query>`ed_index` event=FuelScoop
+| table *</query>
+    <earliest>$token_datetime.earliest$</earliest>
+    <latest>$token_datetime.latest$</latest>
+  </search>
   <fieldset submitButton="false">
     <input type="time" token="token_datetime">
       <label></label>
@@ -28,7 +34,23 @@
   </fieldset>
   <row>
     <panel>
-      <title>Total Jump Distance</title>
+      <title>Jump Distance</title>
+      <html>
+        <h1>Latest</h1>
+      </html>
+      <single>
+        <search base="ed_fsdjump">
+          <query>stats latest(JumpDist) as latest_jump_dist</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.00</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="unit">LY</option>
+      </single>
+      <html>
+        <h1>Total</h1>
+      </html>
       <single>
         <search base="ed_fsdjump">
           <query>stats sum(JumpDist) as total_jump_dist</query>
@@ -42,6 +64,33 @@
     </panel>
     <panel>
       <title>Fuel Statistics</title>
+      <html>
+        <h1>Latest</h1>
+      </html>
+      <single>
+        <title>Fuel Used</title>
+        <search base="ed_fsdjump">
+          <query>stats latest(FuelUsed)</query>
+        </search>
+        <option name="numberPrecision">0.00</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="unit">t</option>
+        <option name="unitPosition">after</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <single>
+        <title>Fuel Scooped</title>
+        <search base="ed_fuelscoop">
+          <query>stats latest(Scooped) as fuel_scooped</query>
+        </search>
+        <option name="numberPrecision">0.00</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="unit">t</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <html>
+        <h1>Total</h1>
+      </html>
       <single>
         <title>Fuel Used</title>
         <search base="ed_fsdjump">
@@ -55,12 +104,8 @@
       </single>
       <single>
         <title>Fuel Scooped</title>
-        <search>
-          <query>`ed_index` event=FuelScoop
-|  stats sum(Scooped) as fuel_scooped</query>
-          <earliest>$token_datetime.earliest$</earliest>
-          <latest>$token_datetime.latest$</latest>
-          <sampleRatio>1</sampleRatio>
+        <search base="ed_fuelscoop">
+          <query>stats sum(Scooped) as fuel_scooped</query>
         </search>
         <option name="numberPrecision">0.00</option>
         <option name="refresh.display">progressbar</option>
@@ -96,7 +141,10 @@
       </chart>
     </panel>
     <panel>
-      <title>Latest FSS Scan</title>
+      <title>FSS Scan</title>
+      <html>
+        <h1>Latest</h1>
+      </html>
       <single>
         <title>Bodys Found</title>
         <search base="ed_fss_discovery_scan_stats">
@@ -110,6 +158,27 @@
         <title>Non Bodys Found</title>
         <search base="ed_fss_discovery_scan_stats">
           <query>fields latest_non_body_count</query>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <html>
+        <h1>Total</h1>
+      </html>
+      <single>
+        <title>Bodys Found</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>fields total_body_count</query>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <single>
+        <title>Non Bodys Found</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>fields total_non_body_count</query>
         </search>
         <option name="numberPrecision">0</option>
         <option name="refresh.display">progressbar</option>

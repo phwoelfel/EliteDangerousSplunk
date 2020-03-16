@@ -1,9 +1,11 @@
 <form theme="dark" script="table_row_highlighting.js" stylesheet="table_decorations.css">
   <label>Exploration</label>
   <search id="ed_fss_discovery_scan_stats">
-    <query>`ed_index` event=FSSDiscoveryScan
+    <query>`ed_index` event IN ("FSSDiscoveryScan", "FSSAllBodiesFound")
+| eval Progress=if(event=="FSSAllBodiesFound", 1, Progress)
+| eval BodyCount=coalesce(BodyCount, Count)
 | dedup SystemName sortby -_time
-| stats sum(BodyCount) as total_body_count sum(NonBodyCount) as total_non_body_count avg(Progress) as avg_progress latest(Progress) as latest_progress latest(BodyCount) as latest_body_count latest(NonBodyCount) as latest_non_body_count</query>
+| stats sum(BodyCount) as total_body_count sum(NonBodyCount) as total_non_body_count avg(Progress) as avg_progress latest(Progress) as latest_progress latest(BodyCount) as latest_body_count latest(NonBodyCount) as latest_non_body_count latest(SystemName) as latest_system_name</query>
     <earliest>$token_datetime.earliest$</earliest>
     <latest>$token_datetime.latest$</latest>
   </search>
@@ -139,6 +141,13 @@
         <option name="charting.gaugeColors">["0xdc4e41","0xf8be34","0x53a051"]</option>
         <option name="height">100</option>
       </chart>
+      <single>
+        <title>Last System</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>fields latest_system_name</query>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </single>
     </panel>
     <panel>
       <title>FSS Scan</title>
@@ -197,9 +206,9 @@
 | eval TerraformState=if(TerraformState!="", TerraformState, "None")
 | lookup ed_scan_payouts.csv PlanetClass TerraformState OUTPUT FullScanPayout FDFullScanPayout
 | eval FullPayout=if(WasDiscovered=="false", FDFullScanPayout, FullScanPayout)
-| eval IsInteresting=if(FullPayout&gt;100000 AND DistanceFromArrivalLS&lt;10000, "true", "false")
-| table _time BodyName StarType PlanetClass Landable WasDiscovered WasMapped TerraformState FullPayout DistanceFromArrivalLS IsInteresting
-          </query>
+| eval IsInteresting=if(FullPayout&gt;100000 AND DistanceFromArrivalLS&lt;200000, "true", "false")
+| eval StarOrPlanetType=coalesce(StarType, PlanetClass)
+| table _time BodyName IsInteresting StarOrPlanetType WasDiscovered WasMapped TerraformState Landable FullPayout DistanceFromArrivalLS</query>
           <earliest>$token_datetime.earliest$</earliest>
           <latest>$token_datetime.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -217,11 +226,8 @@
         <format type="color" field="WasMapped">
           <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
         </format>
-        <format type="color" field="StarType">
-          <colorPalette type="map">{"K":#F8BE34,"G":#F8BE34,"B":#F8BE34,"F":#F8BE34,"O":#F8BE34,"A":#F8BE34,"M":#F8BE34}</colorPalette>
-        </format>
-        <format type="color" field="PlanetClass">
-          <colorPalette type="map">{"High metal content body":#F1813F,"Water world":#006D9C,"Metal rich body":#F8BE34,"Sudarsky class II gas giant":#708794,"Rocky body":#EC9960,"Ammonia world":#B6C75A,"Earth-like world":#53A051}</colorPalette>
+        <format type="color" field="StarOrPlanetType">
+          <colorPalette type="map">{"K":#F8BE34,"G":#F8BE34,"B":#F8BE34,"F":#F8BE34,"O":#F8BE34,"A":#F8BE34,"M":#F8BE34,"High metal content body":#F1813F,"Water world":#006D9C,"Metal rich body":#F8BE34,"Sudarsky class II gas giant":#708794,"Rocky body":#EC9960,"Ammonia world":#B6C75A,"Earth-like world":#53A051,"Icy body":#62B3B2}</colorPalette>
         </format>
         <format type="color" field="TerraformState">
           <colorPalette type="map">{"Terraformable":#53A051,"Terraformed":#53A051}</colorPalette>
@@ -242,7 +248,7 @@
         </format>
         <format type="color" field="DistanceFromArrivalLS">
           <colorPalette type="list">[#53A051,#006D9C,#F8BE34,#F1813F,#DC4E41]</colorPalette>
-          <scale type="threshold">1000,10000,50000,100000</scale>
+          <scale type="threshold">1000,50000,200000,500000</scale>
         </format>
         <format type="color" field="Landable">
           <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>

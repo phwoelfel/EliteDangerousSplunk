@@ -1,0 +1,23 @@
+PlanetClass,TerraformState,k
+Ammonia world,None,96932
+Earthlike body,None,64831
+Earthlike body,Terraformed,116295
+Earthlike body,Terraformable,116295
+Gas giant with ammonia based life,None,300
+Gas giant with water based life,None,300
+Helium rich gas giant,None,300
+High metal content body,None,9654
+High metal content body,Terraformable,100677
+Icy body,None,300
+Metal rich body,None,21790
+Rocky body,None,300
+Rocky body,Terraformable,93328
+Rocky ice body,None,300
+Sudarsky class I gas giant,None,1656
+Sudarsky class II gas giant,None,9654
+Sudarsky class III gas giant,None,300
+Sudarsky class IV gas giant,None,300
+Sudarsky class V gas giant,None,300
+Water giant,None,300
+Water world,None,64831
+Water world,Terraformable,116295

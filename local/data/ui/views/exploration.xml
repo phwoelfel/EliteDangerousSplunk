@@ -25,6 +25,54 @@
     <earliest>$token_datetime.earliest$</earliest>
     <latest>$token_datetime.latest$</latest>
   </search>
+  <search id="ed_scanned_planets">
+    <query>`ed_index` event=Scan
+| sort - _time 
+| fillnull value="None" TerraformState
+| eval TerraformState=if(TerraformState!="", TerraformState, "None")
+| lookup ed_scan_payouts.csv PlanetClass TerraformState OUTPUT FullScanPayout FDFullScanPayout
+| eval FullPayout=if(WasDiscovered=="false", FDFullScanPayout, FullScanPayout)
+| eval Interesting=if(FullPayout&gt;200000 AND DistanceFromArrivalLS&lt;200000, "true", "false")
+| eval StarOrPlanetType=coalesce(StarType, PlanetClass)
+| eval Landable=if(Landable=="true", "yes (" .round(SurfaceGravity, 2) ." G)", "no")
+
+| join type=left SystemAddress BodyID 
+    [search `ed_index` event=SAAScanComplete
+    | eval isMapped="true"
+    | eval withEfficiencyBonus = if(ProbesUsed &lt;= EfficiencyTarget, "true", "false")
+    | table SystemAddress BodyID isMapped withEfficiencyBonus]
+
+| join type=left SystemAddress BodyID 
+    [search `ed_index` event=SAASignalsFound
+    | rename Signals{}.Count AS Signals Signals{}.Type_Localised AS SignalsTypeLocalised Signals{}.Type AS SignalsType
+    | eval SignalType=if(like(SignalsType, "_SAA%"), SignalsTypeLocalised, SignalsType)
+    | table SystemAddress BodyID Signals SignalType]
+
+| fillnull value="None" SignalType
+| fillnull value=0 Signals
+
+| lookup ed_planet_k_values PlanetClass TerraformState OUTPUT k
+| lookup ed_star_k_values StarType OUTPUT k
+| eval k = coalesce(k, if(StarType=="*", 1200, 300))
+| eval q = 0.56591828
+| eval isFirstDiscoverer = if(WasDiscovered=="false", "true", "false"), isFirstMapped = if(WasMapped=="false" AND isMapped="true", "true", "false")
+| eval mappingMultiplier = if(isMapped=="true", if(isFirstDiscoverer=="true" AND isFirstMapped=="true", 3.699622554, if(WasMapped=="false", 8.0956, 3.3333333333)), 1)
+| eval mass = coalesce(MassEM, StellarMass)
+| eval value=(k + k * q * pow(mass, 0.2)) * mappingMultiplier
+```we just assume its odyssey```
+| eval value = if("$token_isOdyssey$"=="true", if(isMapped=="true", value + max(value*0.3, 555), value), value)
+| eval value = if(isMapped=="true" AND withEfficiencyBonus=="true", value*1.25, value)
+| eval value = max(value, 500)
+| eval value = if(isFirstDiscoverer=="true", value * 2.6, value)
+| eval value = if("$token_carrierSell$"=="true", value * 0.75, value)
+| eval value = round(value, 0)
+
+| rename WasDiscovered AS Discovered WasMapped AS Mapped DistanceFromArrivalLS AS Distance
+
+| table _time BodyName Interesting StarOrPlanetType Discovered Mapped TerraformState Signals SignalType Landable FullPayout value Distance</query>
+    <earliest>$token_datetime.earliest$</earliest>
+    <latest>$token_datetime.latest$</latest>
+  </search>
   <fieldset submitButton="false">
     <input type="time" token="token_datetime">
       <label></label>
@@ -32,6 +80,20 @@
         <earliest>-4h@m</earliest>
         <latest>now</latest>
       </default>
+    </input>
+    <input type="radio" token="token_isOdyssey" searchWhenChanged="true">
+      <label>Odyssey?</label>
+      <choice value="true">Yes</choice>
+      <choice value="false">No</choice>
+      <default>true</default>
+      <initialValue>true</initialValue>
+    </input>
+    <input type="radio" token="token_carrierSell">
+      <label>Carrier Sell?</label>
+      <choice value="true">Yes</choice>
+      <choice value="false">No</choice>
+      <default>true</default>
+      <initialValue>true</initialValue>
     </input>
   </fieldset>
   <row>
@@ -197,37 +259,61 @@
   </row>
   <row>
     <panel>
-      <title>Scanned Planets</title>
-      <table id="highlight">
+      <title>Visited Systems</title>
+      <table>
         <search>
-          <query>`ed_index` event=Scan
-| sort - _time 
-| fillnull value="None" TerraformState
-| eval TerraformState=if(TerraformState!="", TerraformState, "None")
-| lookup ed_scan_payouts.csv PlanetClass TerraformState OUTPUT FullScanPayout FDFullScanPayout
-| eval FullPayout=if(WasDiscovered=="false", FDFullScanPayout, FullScanPayout)
-| eval IsInteresting=if(FullPayout&gt;100000 AND DistanceFromArrivalLS&lt;200000, "true", "false")
-| eval StarOrPlanetType=coalesce(StarType, PlanetClass)
-| table _time BodyName IsInteresting StarOrPlanetType WasDiscovered WasMapped TerraformState Landable FullPayout DistanceFromArrivalLS</query>
+          <query>`ed_index` event=FSDJump
+| stats latest(_time) as _time count(StarSystem) as count by StarSystem
+| eval Duplicate=if(count&gt;1, "Yes", "No")
+| sort - _time
+| fields StarSystem _time Duplicate</query>
           <earliest>$token_datetime.earliest$</earliest>
           <latest>$token_datetime.latest$</latest>
-          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">5</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <format type="color" field="Duplicate">
+          <colorPalette type="map">{"Yes":#DC4E41}</colorPalette>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Total Payout</title>
+      <single>
+        <search base="ed_scanned_planets">
+          <query>| dedup BodyName
+| stats sum(value) as TotalPayout</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">101</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Scanned Planets</title>
+      <table id="highlight">
+        <search base="ed_scanned_planets">
+          <query/>
         </search>
         <option name="count">50</option>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
         <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
         <option name="rowNumbers">false</option>
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
-        <format type="color" field="WasDiscovered">
+        <format type="color" field="Discovered">
           <colorPalette type="map">{"false":#DC4E41,"true":#53A051}</colorPalette>
         </format>
-        <format type="color" field="WasMapped">
+        <format type="color" field="Mapped">
           <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
         </format>
         <format type="color" field="StarOrPlanetType">
-          <colorPalette type="map">{"K":#F8BE34,"G":#F8BE34,"B":#F8BE34,"F":#F8BE34,"O":#F8BE34,"A":#F8BE34,"M":#F8BE34,"High metal content body":#F1813F,"Water world":#006D9C,"Metal rich body":#F8BE34,"Sudarsky class II gas giant":#708794,"Rocky body":#EC9960,"Ammonia world":#B6C75A,"Earth-like world":#53A051,"Icy body":#62B3B2}</colorPalette>
+          <colorPalette type="map">{"K":#F8BE34,"G":#F8BE34,"B":#F8BE34,"F":#F8BE34,"O":#F8BE34,"A":#F8BE34,"M":#F8BE34,"High metal content body":#F1813F,"Water world":#006D9C,"Metal rich body":#F8BE34,"Sudarsky class II gas giant":#708794,"Rocky body":#EC9960,"Ammonia world":#B6C75A,"Earth-like world":#53A051,"Icy body":#62B3B2,"Earthlike body":#53A051}</colorPalette>
         </format>
         <format type="color" field="TerraformState">
           <colorPalette type="map">{"Terraformable":#53A051,"Terraformed":#53A051}</colorPalette>
@@ -243,18 +329,32 @@
           <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
           <scale type="threshold">10000,500000</scale>
         </format>
-        <format type="number" field="DistanceFromArrivalLS">
+        <format type="number" field="Distance">
           <option name="unit">LS</option>
         </format>
-        <format type="color" field="DistanceFromArrivalLS">
+        <format type="color" field="Distance">
           <colorPalette type="list">[#53A051,#006D9C,#F8BE34,#F1813F,#DC4E41]</colorPalette>
           <scale type="threshold">1000,50000,200000,500000</scale>
         </format>
         <format type="color" field="Landable">
+          <colorPalette type="expression">if (like(value,"yes%"),"#53A051","#DC4E41")</colorPalette>
+        </format>
+        <format type="color" field="Interesting">
           <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
         </format>
-        <format type="color" field="IsInteresting">
-          <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
+        <format type="number" field="value">
+          <option name="precision">0</option>
+        </format>
+        <format type="color" field="value">
+          <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
+          <scale type="threshold">100000,1000000</scale>
+        </format>
+        <format type="color" field="Signals">
+          <colorPalette type="list">[#3C444D,#53A051]</colorPalette>
+          <scale type="threshold">1</scale>
+        </format>
+        <format type="color" field="SignalType">
+          <colorPalette type="map">{"Geological":#AF575A,"Biological":#B6C75A}</colorPalette>
         </format>
       </table>
     </panel>

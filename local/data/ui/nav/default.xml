@@ -5,6 +5,7 @@
   <view name="fsd_jump_statistics" />
   <view name="mining" />
   <view name="scanning" />
+  <view name="combat" />
   <view name="search" />
   <view name="datasets" />
   <view name="reports" />

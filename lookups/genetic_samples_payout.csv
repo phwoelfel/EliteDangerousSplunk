@@ -1,0 +1,119 @@
+Genus,Species,Name,Payout,CCR,Traits
+Aleoida,Arcus,Aleoida Arcus,11670300,150,
+Aleoida,Coronamus,Aleoida Coronamus,10432700,150,
+Aleoida,Gravis,Aleoida Gravis,16777215,150,
+Aleoida,Laminiae,Aleoida Laminiae,4286000,150,
+Aleoida,Spica,Aleoida Spica,4286000,150,
+Amphora Plant,N/A,Amphora Plant,3626400,100,
+Anemone,Blatteum Bioluminescent,Anemone Blatteum Bioluminescent,3399800,100,B or O-Class Stars
+Anemone,Croceum,Anemone Croceum,3399800,100,B or O-Class Stars
+Anemone,Luteolum,Anemone Luteolum,3399800,100,B or O-Class Stars
+Anemone,Prasinum Bioluminescent,Anemone Prasinum Bioluminescent,3399800,100,B or O-Class Stars
+Anemone,Puniceum,Anemone Puniceum,3399800,100,B or O-Class Stars
+Anemone,Roseum,Anemone Roseum,3399800,100,B or O-Class Stars
+Anemone,Roseum Bioluminescent,Anemone Roseum Bioluminescent,3399800,100,B or O-Class Stars
+Anemone,Rubeum Bioluminescent,Anemone Rubeum Bioluminescent,3399800,100,B or O-Class Stars
+Bacterium,Acies,Bacterium Acies,1500000,500,Neon
+Bacterium,Alcyoneum,Bacterium Alcyoneum,3678100,500,Ammonia
+Bacterium,Aurasus,Bacterium Aurasus,2414700,500,CO2
+Bacterium,Bullaris,Bacterium Bullaris,2766300,500,Methane
+Bacterium,Cerbrus,Bacterium Cerbrus,3732200,500,"Water, Sulfur Dioxide"
+Bacterium,Informem,Bacterium Informem,13114000,500,Nitrogen
+Bacterium,Nebulus,Bacterium Nebulus,9116600,500,Helium
+Bacterium,Omentum,Bacterium Omentum,8226200,500,"Nitrogen, Volcanism"
+Bacterium,Scopulum,Bacterium Scopulum,8633800,500,"CO2, Volcanism"
+Bacterium,Tela,Bacterium Tela,4173100,500,"Helium, Volcanism"
+Bacterium,Verrata,Bacterium Verrata,7177500,500,"Water, Volcanism"
+Bacterium,Vesicula,Bacterium Vesicula,1725400,500,Argon
+Bacterium,Volu,Bacterium Volu,12323000,500,Oxygen
+Bark Mound,N/A,Bark Mound,3350000,100,
+Brain Tree,Aureum,Brain Tree Aureum,3565100,100,Guardian Sites
+Brain Tree,Gypseeum,Brain Tree Gypseeum,3565100,100,Guardian Sites
+Brain Tree,Lindigoticum,Brain Tree Lindigoticum,3565100,100,Guardian Sites
+Brain Tree,Lividum,Brain Tree Lividum,3565100,100,Guardian Sites
+Brain Tree,Ostrinum,Brain Tree Ostrinum,3565100,100,Guardian Sites
+Brain Tree,Puniceum,Brain Tree Puniceum,3565100,100,Guardian Sites
+Brain Tree,Roseum,Brain Tree Roseum,3565100,100,Guardian Sites
+Brain Tree,Viride,Brain Tree Viride,3565100,100,Guardian Sites
+Cactoida,Cortexum,Cactoida Cortexum,6844700,300,Orion-Cygnus Spiral Arm
+Cactoida,Lapis,Cactoida Lapis,5044900,300,Outer Scutum Spiral Arm
+Cactoida,Peperatus,Cactoida Peperatus,5044900,300,Inner Scutum Spiral Arm
+Cactoida,Pullulanta,Cactoida Pullulanta,6844700,300,Perseus Spiral Arm
+Cactoida,Vermis,Cactoida Vermis,16777215,300,Norma Spiral Arm
+Clypeus,Lacrimam,Clypeus Lacrimam,13114000,150,
+Clypeus,Margaritus,Clypeus Margaritus,16777215,150,
+Clypeus,Speculumi,Clypeus Speculumi,16777215,150,
+Concha,Aureolas,Concha Aureolas,12323000,150,
+Concha,Biconcavis,Concha Biconcavis,16777215,150,
+Concha,Labiata,Concha Labiata,4835200,150,
+Concha,Renibus,Concha Renibus,8133800,150,
+Crystalline Shard,N/A,Crystalline Shard,3626400,100,
+Electricae,Pluma,Electricae Pluma,10432700,1000,White Dwarfs
+Electricae,Radialem,Electricae Radialem,10432700,1000,White Dwarfs
+Fonticulua,Campestris,Fonticulua Campestris,1956100,500,Argon
+Fonticulua,Digitos,Fonticulua Digitos,3928300,500,Methane
+Fonticulua,Fluctus,Fonticulua Fluctus,16777215,500,
+Fonticulua,Lapida,Fonticulua Lapida,6017400,500,Nitrogen
+Fonticulua,Segmentatus,Fonticulua Segmentatus,16777215,500,Neon
+Fonticulua,Upupam,Fonticulua Upupam,9701800,500,Argon-Rich
+Frutexa,Acus,Frutexa Acus,12323000,150,
+Frutexa,Collum,Frutexa Collum,3645500,150,
+Frutexa,Fera,Frutexa Fera,3632700,150,
+Frutexa,Flabellum,Frutexa Flabellum,3936600,150,
+Frutexa,Flammasis,Frutexa Flammasis,15387600,150,
+Frutexa,Metallicum,Frutexa Metallicum,3632700,150,
+Frutexa,Sponsae,Frutexa Sponsae,10045400,150,
+Fumerola,Aquatis,Fumerola Aquatis,10432700,100,
+Fumerola,Carbosis,Fumerola Carbosis,10432700,100,
+Fumerola,Extremus,Fumerola Extremus,16777215,100,
+Fumerola,Nitris,Fumerola Nitris,11982000,100,
+Fungoida,Bullarum,Fungoida Bullarum,6896600,300,
+Fungoida,Gelata,Fungoida Gelata,6346900,300,
+Fungoida,Setisis,Fungoida Setisis,3698100,300,
+Fungoida,Stabitis,Fungoida Stabitis,3698100,300,
+Genus,Species,Genus Species,Value (CR),CCR,Traits
+Osseus,Cornibus,Osseus Cornibus,3369700,800,
+Osseus,Discus,Osseus Discus,16777215,800,Geological Activity
+Osseus,Fractus,Osseus Fractus,7365300,800,
+Osseus,Pellebantus,Osseus Pellebantus,14698600,800,
+Osseus,Pumice,Osseus Pumice,6085800,800,
+Osseus,Spiralis,Osseus Spiralis,4919000,800,
+Recepta,Conditivus,Recepta Conditivus,16777215,150,
+Recepta,Deltahedronix,Recepta Deltahedronix,16777215,150,
+Recepta,Umbrux,Recepta Umbrux,16777215,150,
+Sinuous Tuber,Albidum,Sinuous Tuber Albidum,3425600,100,
+Sinuous Tuber,Blatteum,Sinuous Tuber Blatteum,3425600,100,
+Sinuous Tuber,Caeruleum,Sinuous Tuber Caeruleum,3425600,100,
+Sinuous Tuber,Lindigoticum,Sinuous Tuber Lindigoticum,3425600,100,
+Sinuous Tuber,Prasinum,Sinuous Tuber Prasinum,3425600,100,
+Sinuous Tuber,Roseus,Sinuous Tuber Roseus,3425600,100,
+Sinuous Tuber,Violaceum,Sinuous Tuber Violaceum,3425600,100,
+Sinuous Tuber,Viride,Sinuous Tuber Viride,3425600,100,
+Stratum,Araneamus,Stratum Araneamus,4989600,500,
+Stratum,Cucumisis,Stratum Cucumisis,16777215,500,
+Stratum,Excutitus,Stratum Excutitus,4989600,500,
+Stratum,Frigus,Stratum Frigus,5287900,500,
+Stratum,Laminamus,Stratum Laminamus,5523100,500,
+Stratum,Limaxus,Stratum Limaxus,3152500,500,
+Stratum,Paleas,Stratum Paleas,3152500,500,
+Stratum,Tectonicas,Stratum Tectonicas,16777215,500,High Metal Content Planets
+Tubus,Cavas,Tubus Cavas,16777215,800,
+Tubus,Compagibus,Tubus Compagibus,12323000,800,
+Tubus,Conifer,Tubus Conifer,4936300,800,
+Tubus,Rosarium,Tubus Rosarium,5287900,800,
+Tubus,Sororibus,Tubus Sororibus,9701800,800,
+Tussock,Albata,Tussock Albata,6230500,200,
+Tussock,Capillum,Tussock Capillum,11383900,200,
+Tussock,Caputus,Tussock Caputus,6557900,200,
+Tussock,Catena,Tussock Catena,3864400,200,
+Tussock,Cultro,Tussock Cultro,3864400,200,
+Tussock,Divisa,Tussock Divisa,3864400,200,
+Tussock,Ignis,Tussock Ignis,4004600,200,
+Tussock,Pennata,Tussock Pennata,9868700,200,
+Tussock,Pennatis,Tussock Pennatis,1832900,200,
+Tussock,Propagito,Tussock Propagito,2194200,200,
+Tussock,Serrati,Tussock Serrati,7958800,200,
+Tussock,Stigmasis,Tussock Stigmasis,16777215,200,
+Tussock,Triticum,Tussock Triticum,12323000,200,
+Tussock,Ventusa,Tussock Ventusa,6193300,200,
+Tussock,Virgam,Tussock Virgam,16777215,200,

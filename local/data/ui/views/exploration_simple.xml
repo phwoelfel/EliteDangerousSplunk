@@ -1,5 +1,5 @@
-<form theme="dark">
-  <label>Exploration</label>
+<form theme="dark" >
+  <label>Exploration Simple</label>
   <search id="ed_fss_discovery_scan_stats">
     <query>`ed_index` event IN ("FSSDiscoveryScan", "FSSAllBodiesFound")
 | eval Progress=if(event=="FSSAllBodiesFound", 1, Progress)
@@ -17,27 +17,11 @@
 | rename Body AS BodyID 
 | join type=left SystemAddress BodyID 
     [
-    search `ed_index` event=Scan 
+    search `ed_index` event=Scan
     | table SystemAddress BodyID BodyName
     ] 
 | sort - _time 
 | table _time BodyName ScanType Genus_Localised Species_Localised Info Payout</query>
-    <earliest>$token_datetime.earliest$</earliest>
-    <latest>$token_datetime.latest$</latest>
-  </search>
-  <search id="ed_fsdjump">
-    <query>`ed_index` event=FSDJump
-| eval SystemEconomy=coalesce(SystemEconomy_Localised, SystemEconomy)
-| eval SystemGovernment=coalesce(SystemGovernment_Localised, SystemGovernment)
-| eval SystemSecondEconomy=coalesce(SystemSecondEconomy_Localised, SystemSecondEconomy)
-| eval SystemSecurity=coalesce(SystemSecurity_Localised, SystemSecurity)
-| table *</query>
-    <earliest>$token_datetime.earliest$</earliest>
-    <latest>$token_datetime.latest$</latest>
-  </search>
-  <search id="ed_fuelscoop">
-    <query>`ed_index` event=FuelScoop
-| table *</query>
     <earliest>$token_datetime.earliest$</earliest>
     <latest>$token_datetime.latest$</latest>
   </search>
@@ -58,13 +42,13 @@
     | eval withEfficiencyBonus = if(ProbesUsed &lt;= EfficiencyTarget, "true", "false")
     | table SystemAddress BodyID isMapped withEfficiencyBonus]
 
-| join type=left SystemAddress BodyID 
+| join type=left SystemAddress BodyID
     [search `ed_index` event=SAASignalsFound
     | rename Signals{}.Count AS SAASignals Signals{}.Type_Localised AS SignalsTypeLocalised Signals{}.Type AS SignalsType
     | eval SAASignalType=if(like(SignalsType, "_SAA%"), SignalsTypeLocalised, SignalsType)
     | table SystemAddress BodyID SAASignals SAASignalType]
 
-| join type=left SystemAddress BodyID 
+| join type=left SystemAddress BodyID
     [search `ed_index` event=FSSBodySignals
     | rename Signals{}.Count AS FSSSignals Signals{}.Type_Localised AS SignalsTypeLocalised Signals{}.Type AS SignalsType
     | eval FSSSignalType=if(like(SignalsType, "_SAA%"), SignalsTypeLocalised, SignalsType)
@@ -122,86 +106,6 @@
     </input>
   </fieldset>
   <row>
-    <panel>
-      <title>Jump Distance</title>
-      <html>
-        <h1>Latest</h1>
-      </html>
-      <single>
-        <search base="ed_fsdjump">
-          <query>stats latest(JumpDist) as latest_jump_dist</query>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="numberPrecision">0.00</option>
-        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">LY</option>
-      </single>
-      <html>
-        <h1>Total</h1>
-      </html>
-      <single>
-        <search base="ed_fsdjump">
-          <query>stats sum(JumpDist) as total_jump_dist</query>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="numberPrecision">0.00</option>
-        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">LY</option>
-      </single>
-    </panel>
-    <panel>
-      <title>Fuel Statistics</title>
-      <html>
-        <h1>Latest</h1>
-      </html>
-      <single>
-        <title>Fuel Used</title>
-        <search base="ed_fsdjump">
-          <query>stats latest(FuelUsed)</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="unitPosition">after</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <single>
-        <title>Fuel Scooped</title>
-        <search base="ed_fuelscoop">
-          <query>stats latest(Scooped) as fuel_scooped</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <html>
-        <h1>Total</h1>
-      </html>
-      <single>
-        <title>Fuel Used</title>
-        <search base="ed_fsdjump">
-          <query>stats sum(FuelUsed)</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="unitPosition">after</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <single>
-        <title>Fuel Scooped</title>
-        <search base="ed_fuelscoop">
-          <query>stats sum(Scooped) as fuel_scooped</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-    </panel>
     <panel>
       <title>FSS Scan</title>
       <chart>
@@ -281,6 +185,35 @@
         <option name="useThousandSeparators">1</option>
       </single>
     </panel>
+    <panel>
+      <title>Total Payout</title>
+      <html>
+        <h1>Scans</h1>
+      </html>
+      <single>
+        <title></title>
+        <search base="ed_scanned_planets">
+          <query>| dedup BodyName
+| stats sum(value) as TotalPayout</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">101</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+      <html>
+        <h1>Organics</h1>
+      </html>
+      <single>
+        <title></title>
+        <search base="ed_organics_scan_stats">
+          <query>
+| stats sum(Payout) as TotalPayout</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">101</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
   </row>
   <row>
     <panel>
@@ -316,7 +249,7 @@
     
 | sort - _time 
 | join type=Left SystemAddress 
-    [ search `ed_index` `ed_journal` event=FSDJump 
+    [ search `ed_index` `ed_journal` event=FSDJump
     | dedup SystemAddress 
     | table SystemAddress StarSystem]
 | eval "All Scanned"=if(Signals==Scans, "Yes", "No")
@@ -333,7 +266,7 @@
       </table>
     </panel>
     <panel>
-      <title>Biological Signals per Body</title>
+      <title>Biological Signals per Planet</title>
       <table>
         <search>
           <query>`ed_index` event=SAASignalsFound Signals{}.Type_Localised="Biological"
@@ -356,39 +289,11 @@
           <latest>$token_datetime.latest$</latest>
         </search>
         <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
         <format type="color" field="All Scanned">
           <colorPalette type="map">{"Yes":#53A051,"No":#DC4E41}</colorPalette>
         </format>
       </table>
-    </panel>
-    <panel>
-      <title>Total Payout</title>
-      <html>
-        <h1>Scans</h1>
-      </html>
-      <single>
-        <title></title>
-        <search base="ed_scanned_planets">
-          <query>| dedup BodyName
-| stats sum(value) as TotalPayout</query>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="height">101</option>
-        <option name="refresh.display">progressbar</option>
-      </single>
-      <html>
-        <h1>Organics</h1>
-      </html>
-      <single>
-        <title></title>
-        <search base="ed_organics_scan_stats">
-          <query>
-| stats sum(Payout) as TotalPayout</query>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="height">101</option>
-        <option name="refresh.display">progressbar</option>
-      </single>
     </panel>
   </row>
   <row>
@@ -402,7 +307,6 @@
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
         <option name="percentagesRow">false</option>
-        <option name="refresh.display">progressbar</option>
         <option name="rowNumbers">false</option>
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
@@ -420,6 +324,7 @@
         </format>
         <format type="number" field="FullPayout">
           <option name="precision">0</option>
+          <option name="unit">CR</option>
         </format>
         <format type="color" field="FullPayout">
           <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
@@ -444,6 +349,7 @@
         </format>
         <format type="number" field="value">
           <option name="precision">0</option>
+          <option name="unit">CR</option>
         </format>
         <format type="color" field="value">
           <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
@@ -488,6 +394,10 @@
         </format>
         <format type="color" field="ScanType">
           <colorPalette type="map">{"Analyse":#53A051}</colorPalette>
+        </format>
+        <format type="color" field="BodyName">
+          <colorPalette type="sharedList"></colorPalette>
+          <scale type="sharedCategory"></scale>
         </format>
       </table>
     </panel>

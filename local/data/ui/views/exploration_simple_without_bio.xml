@@ -1,43 +1,11 @@
 <form theme="dark">
-  <label>Exploration</label>
+  <label>Exploration Simple without Bio</label>
   <search id="ed_fss_discovery_scan_stats">
     <query>`ed_index` event IN ("FSSDiscoveryScan", "FSSAllBodiesFound")
 | eval Progress=if(event=="FSSAllBodiesFound", 1, Progress)
 | eval BodyCount=coalesce(BodyCount, Count)
 | dedup SystemName sortby -_time
 | stats sum(BodyCount) as total_body_count sum(NonBodyCount) as total_non_body_count avg(Progress) as avg_progress latest(Progress) as latest_progress latest(BodyCount) as latest_body_count latest(NonBodyCount) as latest_non_body_count latest(SystemName) as latest_system_name</query>
-    <earliest>$token_datetime.earliest$</earliest>
-    <latest>$token_datetime.latest$</latest>
-  </search>
-  <search id="ed_organics_scan_stats">
-    <query>`ed_index` event=ScanOrganic
-| lookup genetic_samples_payout.csv Name AS Species_Localised OUTPUT Payout CCR 
-| eval Info=if(ScanType=="Analyse", Payout, CCR)
-| eval Payout=if(ScanType=="Analyse", Payout, 0)
-| rename Body AS BodyID 
-| join type=left SystemAddress BodyID 
-    [
-    search `ed_index` event=Scan 
-    | table SystemAddress BodyID BodyName
-    ] 
-| sort - _time 
-| table _time BodyName ScanType Genus_Localised Species_Localised Info Payout</query>
-    <earliest>$token_datetime.earliest$</earliest>
-    <latest>$token_datetime.latest$</latest>
-  </search>
-  <search id="ed_fsdjump">
-    <query>`ed_index` event=FSDJump
-| eval SystemEconomy=coalesce(SystemEconomy_Localised, SystemEconomy)
-| eval SystemGovernment=coalesce(SystemGovernment_Localised, SystemGovernment)
-| eval SystemSecondEconomy=coalesce(SystemSecondEconomy_Localised, SystemSecondEconomy)
-| eval SystemSecurity=coalesce(SystemSecurity_Localised, SystemSecurity)
-| table *</query>
-    <earliest>$token_datetime.earliest$</earliest>
-    <latest>$token_datetime.latest$</latest>
-  </search>
-  <search id="ed_fuelscoop">
-    <query>`ed_index` event=FuelScoop
-| table *</query>
     <earliest>$token_datetime.earliest$</earliest>
     <latest>$token_datetime.latest$</latest>
   </search>
@@ -48,7 +16,6 @@
 | eval TerraformState=if(TerraformState!="", TerraformState, "None")
 | lookup ed_scan_payouts.csv PlanetClass TerraformState OUTPUT FullScanPayout FDFullScanPayout
 | eval FullPayout=if(WasDiscovered=="false", FDFullScanPayout, FullScanPayout)
-| eval Interesting=if(FullPayout&gt;200000 AND DistanceFromArrivalLS&lt;200000, "true", "false")
 | eval StarOrPlanetType=coalesce(StarType, PlanetClass)
 | eval Landable=if(Landable=="true", if(SurfaceGravity/10 >= 1, "HighG (" .round(SurfaceGravity/10, 2) ." G)", "Yes (" .round(SurfaceGravity/10, 2) ." G)"), "No")
 
@@ -58,13 +25,13 @@
     | eval withEfficiencyBonus = if(ProbesUsed &lt;= EfficiencyTarget, "true", "false")
     | table SystemAddress BodyID isMapped withEfficiencyBonus]
 
-| join type=left SystemAddress BodyID 
+| join type=left SystemAddress BodyID
     [search `ed_index` event=SAASignalsFound
     | rename Signals{}.Count AS SAASignals Signals{}.Type_Localised AS SignalsTypeLocalised Signals{}.Type AS SignalsType
     | eval SAASignalType=if(like(SignalsType, "_SAA%"), SignalsTypeLocalised, SignalsType)
     | table SystemAddress BodyID SAASignals SAASignalType]
 
-| join type=left SystemAddress BodyID 
+| join type=left SystemAddress BodyID
     [search `ed_index` event=FSSBodySignals
     | rename Signals{}.Count AS FSSSignals Signals{}.Type_Localised AS SignalsTypeLocalised Signals{}.Type AS SignalsType
     | eval FSSSignalType=if(like(SignalsType, "_SAA%"), SignalsTypeLocalised, SignalsType)
@@ -94,7 +61,7 @@
 
 | rename WasDiscovered AS Discovered WasMapped AS Mapped DistanceFromArrivalLS AS Distance
 | eval Payout=tostring(FullPayout, "commas") +" CR / " +tostring(value, "commas") +" CR"
-| table _time BodyName Interesting StarOrPlanetType Discovered Mapped TerraformState AtmosphereType Signals SignalType Landable Payout Distance</query>
+| table _time BodyName StarOrPlanetType Discovered Mapped TerraformState AtmosphereType Signals SignalType Landable Payout Distance value FullPayout</query>
     <earliest>$token_datetime.earliest$</earliest>
     <latest>$token_datetime.latest$</latest>
   </search>
@@ -122,86 +89,6 @@
     </input>
   </fieldset>
   <row>
-    <panel>
-      <title>Jump Distance</title>
-      <html>
-        <h1>Latest</h1>
-      </html>
-      <single>
-        <search base="ed_fsdjump">
-          <query>stats latest(JumpDist) as latest_jump_dist</query>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="numberPrecision">0.00</option>
-        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">LY</option>
-      </single>
-      <html>
-        <h1>Total</h1>
-      </html>
-      <single>
-        <search base="ed_fsdjump">
-          <query>stats sum(JumpDist) as total_jump_dist</query>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="numberPrecision">0.00</option>
-        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">LY</option>
-      </single>
-    </panel>
-    <panel>
-      <title>Fuel Statistics</title>
-      <html>
-        <h1>Latest</h1>
-      </html>
-      <single>
-        <title>Fuel Used</title>
-        <search base="ed_fsdjump">
-          <query>stats latest(FuelUsed)</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="unitPosition">after</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <single>
-        <title>Fuel Scooped</title>
-        <search base="ed_fuelscoop">
-          <query>stats latest(Scooped) as fuel_scooped</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <html>
-        <h1>Total</h1>
-      </html>
-      <single>
-        <title>Fuel Used</title>
-        <search base="ed_fsdjump">
-          <query>stats sum(FuelUsed)</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="unitPosition">after</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <single>
-        <title>Fuel Scooped</title>
-        <search base="ed_fuelscoop">
-          <query>stats sum(Scooped) as fuel_scooped</query>
-        </search>
-        <option name="numberPrecision">0.00</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="unit">t</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-    </panel>
     <panel>
       <title>FSS Scan</title>
       <chart>
@@ -239,27 +126,6 @@
     <panel>
       <title>FSS Scan</title>
       <html>
-        <h1>Latest</h1>
-      </html>
-      <single>
-        <title>Bodys Found</title>
-        <search base="ed_fss_discovery_scan_stats">
-          <query>fields latest_body_count</query>
-        </search>
-        <option name="numberPrecision">0</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <single>
-        <title>Non Bodys Found</title>
-        <search base="ed_fss_discovery_scan_stats">
-          <query>fields latest_non_body_count</query>
-        </search>
-        <option name="numberPrecision">0</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="useThousandSeparators">1</option>
-      </single>
-      <html>
         <h1>Total</h1>
       </html>
       <single>
@@ -275,6 +141,27 @@
         <title>Non Bodys Found</title>
         <search base="ed_fss_discovery_scan_stats">
           <query>fields total_non_body_count</query>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <html>
+        <h1>Latest</h1>
+      </html>
+      <single>
+        <title>Bodys Found</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>fields latest_body_count</query>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+      <single>
+        <title>Non Bodys Found</title>
+        <search base="ed_fss_discovery_scan_stats">
+          <query>fields latest_non_body_count</query>
         </search>
         <option name="numberPrecision">0</option>
         <option name="refresh.display">progressbar</option>
@@ -304,64 +191,6 @@
       </table>
     </panel>
     <panel>
-      <title>Biological Signals per System</title>
-      <table>
-        <search>
-          <query>`ed_index` event=FSSBodySignals Signals{}.Type_Localised="Biological"
-| stats count(BodyID) as Bodys sum(Signals{}.Count) as Signals latest(_time) as _time by SystemAddress 
-| join type=Left SystemAddress 
-   [search `ed_index` `ed_journal` event=ScanOrganic ScanType=Analyse
-    | stats count by SystemAddress
-    | rename count as Scans]
-    
-| sort - _time 
-| join type=Left SystemAddress 
-    [ search `ed_index` `ed_journal` event=FSDJump 
-    | dedup SystemAddress 
-    | table SystemAddress StarSystem]
-| eval "All Scanned"=if(Signals==Scans, "Yes", "No")
-| table StarSystem Bodys Signals Scans "All Scanned"</query>
-          <earliest>$token_datetime.earliest$</earliest>
-          <latest>$token_datetime.latest$</latest>
-        </search>
-        <option name="count">5</option>
-        <option name="drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-        <format type="color" field="All Scanned">
-          <colorPalette type="map">{"Yes":#53A051,"No":#DC4E41}</colorPalette>
-        </format>
-      </table>
-    </panel>
-    <panel>
-      <title>Biological Signals per Body</title>
-      <table>
-        <search>
-          <query>`ed_index` event=SAASignalsFound Signals{}.Type_Localised="Biological"
-| dedup BodyID SystemAddress
-| stats sum(Signals{}.Count) as Signals latest(_time) as _time by BodyID SystemAddress
-| sort - _time 
-| join type=left SystemAddress BodyID 
-    [
-    search `ed_index` event=Scan
-    | table SystemAddress BodyID BodyName
-    ]
- | join type=Left SystemAddress BodyID
-   [search `ed_index` `ed_journal` event=ScanOrganic ScanType=Analyse
-    | rename Body AS BodyID 
-    | stats count by BodyID SystemAddress
-    | rename count as Scans]
-| eval "All Scanned"=if(Signals==Scans, "Yes", "No")
-| table BodyName Signals Scans "All Scanned"</query>
-          <earliest>$token_datetime.earliest$</earliest>
-          <latest>$token_datetime.latest$</latest>
-        </search>
-        <option name="drilldown">none</option>
-        <format type="color" field="All Scanned">
-          <colorPalette type="map">{"Yes":#53A051,"No":#DC4E41}</colorPalette>
-        </format>
-      </table>
-    </panel>
-    <panel>
       <title>Total Payout</title>
       <html>
         <h1>Scans</h1>
@@ -376,19 +205,6 @@
         <option name="height">101</option>
         <option name="refresh.display">progressbar</option>
       </single>
-      <html>
-        <h1>Organics</h1>
-      </html>
-      <single>
-        <title></title>
-        <search base="ed_organics_scan_stats">
-          <query>
-| stats sum(Payout) as TotalPayout</query>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="height">101</option>
-        <option name="refresh.display">progressbar</option>
-      </single>
     </panel>
   </row>
   <row>
@@ -396,13 +212,14 @@
       <title>Scanned Planets</title>
       <table id="highlight">
         <search base="ed_scanned_planets">
-          <query/>
+          <query>
+            | table _time BodyName StarOrPlanetType Discovered Mapped TerraformState AtmosphereType Signals SignalType Landable Payout Distance
+          </query>
         </search>
         <option name="count">50</option>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">none</option>
         <option name="percentagesRow">false</option>
-        <option name="refresh.display">progressbar</option>
         <option name="rowNumbers">false</option>
         <option name="totalsRow">false</option>
         <option name="wrap">true</option>
@@ -420,6 +237,7 @@
         </format>
         <format type="number" field="FullPayout">
           <option name="precision">0</option>
+          <option name="unit">CR</option>
         </format>
         <format type="color" field="FullPayout">
           <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
@@ -439,11 +257,9 @@
         <format type="color" field="Landable">
           <colorPalette type="expression">if(like(value,"Yes%"),"#53A051",if(like(value,"HighG%"), "#5A4575", "#DC4E41"))</colorPalette>
         </format>
-        <format type="color" field="Interesting">
-          <colorPalette type="map">{"true":#53A051,"false":#DC4E41}</colorPalette>
-        </format>
         <format type="number" field="value">
           <option name="precision">0</option>
+          <option name="unit">CR</option>
         </format>
         <format type="color" field="value">
           <colorPalette type="list">[#3C444D,#006D9C,#53A051]</colorPalette>
@@ -458,36 +274,6 @@
         </format>
         <format type="color" field="AtmosphereType">
           <colorPalette type="expression">if(match(value,"None"),"#3C444D", "#62B3B2")</colorPalette>
-        </format>
-      </table>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>Organic Scans</title>
-      <table>
-        <search base="ed_organics_scan_stats">
-          <query>
-            | table _time BodyName ScanType Genus_Localised Species_Localised Info
-            | rename Info as "Payout/CCR"
-          </query>
-        </search>
-        <option name="count">100</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
-        <option name="percentagesRow">false</option>
-        <option name="rowNumbers">false</option>
-        <option name="totalsRow">false</option>
-        <option name="wrap">true</option>
-        <format type="number" field="Payout/CCR">
-          <option name="precision">0</option>
-        </format>
-        <format type="color" field="Payout/CCR">
-          <colorPalette type="list">[#3C444D,#708794,#53A051]</colorPalette>
-          <scale type="threshold">1000,5000000</scale>
-        </format>
-        <format type="color" field="ScanType">
-          <colorPalette type="map">{"Analyse":#53A051}</colorPalette>
         </format>
       </table>
     </panel>

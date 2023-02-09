@@ -1,0 +1,57 @@
+<form theme="dark">
+  <label>BGS</label>
+  <description>Background Simulation</description>
+  <fieldset submitButton="false">
+    <input type="time" token="token_datetime">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Overview</title>
+      <table>
+        <search>
+          <query>index=elite sourcetype="elite:*" event=FSDJump
+| dedup SystemAddress
+| spath path=Factions{} output=Factions
+| table StarSystem Factions
+| mvexpand Factions
+| spath input=Factions
+| rename "ActiveStates{}.State" AS ActiveStates, "PendingStates{}.State" AS PendingStates, "PendingStates{}.Trend" AS PendingStatesTrend, "RecoveringStates{}.State" AS RecoveringStates, "RecoveringStates{}.Trend" AS RecoveringStatesTrend
+| eval Influence=round(Influence*100, 2)
+| table StarSystem Name Allegiance Government Influence FactionState ActiveStates PendingStates PendingStaesTrend RecoveringStates RecoveringStatesTrend</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <format type="color" field="ActiveStates">
+          <colorPalette type="map">{"Election":#62B3B2,"PirateAttack":#AF575A,"Expansion":#B6C75A,"Terrorism":#EC9960,"Boom":#53A051,"CivilWar":#DC4E41,"War":#DC4E41}</colorPalette>
+        </format>
+        <format type="color" field="FactionState">
+          <colorPalette type="map">{"Election":#62B3B2,"PirateAttack":#AF575A,"Expansion":#B6C75A,"Terrorism":#EC9960,"Boom":#53A051,"CivilWar":#DC4E41,"War":#DC4E41}</colorPalette>
+        </format>
+        <format type="color" field="PendingStates">
+          <colorPalette type="map">{"Election":#62B3B2,"PirateAttack":#AF575A,"Expansion":#B6C75A,"Terrorism":#EC9960,"Boom":#53A051,"CivilWar":#DC4E41,"War":#DC4E41}</colorPalette>
+        </format>
+        <format type="color" field="RecoveringStates">
+          <colorPalette type="map">{"Election":#62B3B2,"PirateAttack":#AF575A,"Expansion":#B6C75A,"Terrorism":#EC9960,"Boom":#53A051,"CivilWar":#DC4E41,"War":#DC4E41}</colorPalette>
+        </format>
+        <format type="number" field="Influence">
+          <option name="unit">%</option>
+        </format>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -1,5 +1,8 @@
 <nav search_view="search">
   <view name="exploration" default='true' />
+  <view name="exploration_simple" />
+  <view name="exploration_simple_without_bio" />
+  <view name="exploration_bios" />
   <view name="overview" />
   <view name="statistics" />
   <view name="fsd_jump_statistics" />

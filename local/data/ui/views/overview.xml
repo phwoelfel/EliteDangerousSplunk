@@ -11,6 +11,28 @@
   </fieldset>
   <row>
     <panel>
+      <title>Game Time</title>
+      <table>
+        <search>
+          <query>`ed_index` event IN ("Shutdown", "LoadGame") OR (event="Music" MusicTrack="MainMenu")
+| transaction startswith=(event="LoadGame") endswith=(event="Shutdown" OR (event="Music" MusicTrack="MainMenu"))
+| stats sum(duration) as total_duration avg(duration) as avg_duration
+| eval total_duration=tostring(total_duration, "duration"), avg_duration=tostring(round(avg_duration, 0), "duration")</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
       <title>Event Summary</title>
       <chart>
         <search>

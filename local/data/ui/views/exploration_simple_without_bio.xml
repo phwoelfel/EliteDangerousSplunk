@@ -10,7 +10,38 @@
     <latest>$token_datetime.latest$</latest>
   </search>
   <search id="ed_scanned_planets">
-    <query>`ed_index` event=Scan
+    <query>
+      `ed_index` event IN (Scan, SAAScanComplete, SAASignalsFound, FSSBodySignals)
+| eval SAASignals=if(event=="SAASignalsFound", 'Signals{}.Count', null())
+| eval SAASignalType=if(event=="SAASignalsFound", if(like('Signals{}.Type', "_SAA%"), 'Signals{}.Type_Localised', 'Signals{}.Type'), null())
+| eval FSSSignals=if(event=="FSSBodySignals", 'Signals{}.Count', null())
+| eval SAASignalType=if(event=="FSSBodySignals", if(like('Signals{}.Type', "_SAA%"), 'Signals{}.Type_Localised', 'Signals{}.Type'), null())
+| stats 
+    latest(_time) as _time,
+    values(TerraformState) as TerraformState,
+    values(PlanetClass) as PlanetClass,
+    values(WasDiscovered) as WasDiscovered,
+    values(WasMapped) as WasMapped,
+    values(StarType) as StarType,
+    values(Landable) as Landable,
+    values(SurfaceGravity) as SurfaceGravity,
+    values(ProbesUsed) as ProbesUsed,
+    values(EfficiencyTarget) as EfficiencyTarget,
+    list(SAASignals) as SAASignals,
+    list(SAASignalType) as SAASignalType,
+    list(FSSSignals) as FSSSignals,
+    list(FSSSignalType) as FSSSignalType,
+    values(AtmosphereType) as AtmosphereType,
+    values(MassEM) as MassEM,
+    values(StellarMass) as StellarMass,
+    avg(DistanceFromArrivalLS) as DistanceFromArrivalLS,
+    values(BodyName) as BodyName,
+by SystemAddress BodyID
+
+
+| eval isMapped=if(isnull(ProbesUsed), "true", "false")
+| eval withEfficiencyBonus = if(ProbesUsed &lt;= EfficiencyTarget, "true", "false")
+
 | sort - _time 
 | fillnull value="None" TerraformState
 | eval TerraformState=if(TerraformState!="", TerraformState, "None")
@@ -19,23 +50,6 @@
 | eval StarOrPlanetType=coalesce(StarType, PlanetClass)
 | eval Landable=if(Landable=="true", if(SurfaceGravity/10 >= 1, "HighG (" .round(SurfaceGravity/10, 2) ." G)", "Yes (" .round(SurfaceGravity/10, 2) ." G)"), "No")
 
-| join type=left SystemAddress BodyID 
-    [search `ed_index` event=SAAScanComplete
-    | eval isMapped="true"
-    | eval withEfficiencyBonus = if(ProbesUsed &lt;= EfficiencyTarget, "true", "false")
-    | table SystemAddress BodyID isMapped withEfficiencyBonus]
-
-| join type=left SystemAddress BodyID
-    [search `ed_index` event=SAASignalsFound
-    | rename Signals{}.Count AS SAASignals Signals{}.Type_Localised AS SignalsTypeLocalised Signals{}.Type AS SignalsType
-    | eval SAASignalType=if(like(SignalsType, "_SAA%"), SignalsTypeLocalised, SignalsType)
-    | table SystemAddress BodyID SAASignals SAASignalType]
-
-| join type=left SystemAddress BodyID
-    [search `ed_index` event=FSSBodySignals
-    | rename Signals{}.Count AS FSSSignals Signals{}.Type_Localised AS SignalsTypeLocalised Signals{}.Type AS SignalsType
-    | eval FSSSignalType=if(like(SignalsType, "_SAA%"), SignalsTypeLocalised, SignalsType)
-    | table SystemAddress BodyID FSSSignals FSSSignalType]
 
 | eval Signals=coalesce(SAASignals, FSSSignals)
 | eval SignalType=coalesce(SAASignalType, FSSSignalType)
@@ -61,7 +75,8 @@
 
 | rename WasDiscovered AS Discovered WasMapped AS Mapped DistanceFromArrivalLS AS Distance
 | eval Payout=tostring(FullPayout, "commas") +" CR / " +tostring(value, "commas") +" CR"
-| table _time BodyName StarOrPlanetType Discovered Mapped TerraformState AtmosphereType Signals SignalType Landable Payout Distance value FullPayout</query>
+| table _time BodyName StarOrPlanetType Discovered Mapped TerraformState AtmosphereType Signals SignalType Landable Payout Distance value FullPayout
+</query>
     <earliest>$token_datetime.earliest$</earliest>
     <latest>$token_datetime.latest$</latest>
   </search>

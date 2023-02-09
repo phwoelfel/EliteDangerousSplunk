@@ -1,0 +1,149 @@
+<form theme="dark">
+  <label>Trading</label>
+  <search id="earnings_base">
+    <query>index=elite sourcetype="elite:journal" event IN (MarketBuy, MarketSell)
+| stats sum(TotalCost) as TotalCost sum(TotalSale) as TotalSale
+| eval Earnings=TotalSale-TotalCost
+</query>
+    <earliest>$token_datetime.earliest$</earliest>
+    <latest>$token_datetime.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="token_datetime">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Sells</title>
+      <table>
+        <search>
+          <query>index=elite sourcetype="elite:journal" event=MarketSell 
+| join 
+    [ search index=elite sourcetype="elite:journal" event=Market 
+    | table MarketID StationName StationType StarSystem] 
+| eval StationName=coalesce(StationName, "Unknown")
+| eval Type=coalesce(Type_Localised, Type)
+| stats sum(Count) as Count sum(TotalSale) as TotalSale latest(SellPrice) as LatestPrice by StationName Type</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">true</option>
+        <option name="wrap">true</option>
+        <format type="number" field="TotalSale">
+          <option name="precision">0</option>
+        </format>
+        <format type="number" field="Count">
+          <option name="precision">0</option>
+        </format>
+        <format type="number" field="LatestPrice">
+          <option name="precision">0</option>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Buys</title>
+      <table>
+        <search>
+          <query>index=elite sourcetype="elite:journal" event=MarketBuy 
+| join 
+    [ search index=elite sourcetype="elite:journal" event=Market 
+    | table MarketID StationName StationType StarSystem] 
+| eval StationName=coalesce(StationName, "Unknown") 
+| eval Type=coalesce(Type_Localised, Type) 
+| stats sum(Count) as Count sum(TotalCost) as TotalCost latest(BuyPrice) as LatestPrice by StationName Type</query>
+          <earliest>$token_datetime.earliest$</earliest>
+          <latest>$token_datetime.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">true</option>
+        <option name="wrap">true</option>
+        <format type="number" field="TotalSale">
+          <option name="precision">0</option>
+        </format>
+        <format type="number" field="Count">
+          <option name="precision">0</option>
+        </format>
+        <format type="number" field="LatestPrice">
+          <option name="precision">0</option>
+        </format>
+        <format type="number" field="TotalCost">
+          <option name="precision">0</option>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Costs</title>
+      <single>
+        <search base="earnings_base">
+          <query>fields TotalCost</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0xdc4e41","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Sale</title>
+      <single>
+        <search base="earnings_base">
+          <query>fields TotalSale</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x53a051","0x53a051"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Earnings</title>
+      <single>
+        <search base="earnings_base">
+          <query>fields Earnings</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0xdc4e41","0x53a051"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <search base="earnings_base">
+          <query>| eval Money="Money"
+| table Money Earnings TotalSale TotalCost</query>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.overlayFields">Earnings</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>
